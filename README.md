@@ -12,6 +12,7 @@ Developed on **MATLAB R2021a** <br />
 Created by **Sneh Kothari**
 
 **Also Available on:**
+[![View Harmonic_Visualizer on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://in.mathworks.com/matlabcentral/fileexchange/89704-harmonic_visualizer)
 
 ## Instructions:
 
