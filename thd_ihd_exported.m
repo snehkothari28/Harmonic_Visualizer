@@ -1,3 +1,5 @@
+%Created by Sneh Kothari
+%https://github.com/snehkothari28/Harmonic_Visualizer
 %This is a program to visualise the effect of harmonic's magnitude and its
 %phase on the waveform, IHD and THD.
 classdef thd_ihd_exported < matlab.apps.AppBase
