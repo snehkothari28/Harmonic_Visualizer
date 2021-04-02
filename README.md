@@ -1,6 +1,9 @@
 # Harmonic Visualizer
-This is a program to visualize the effect of harmonic's magnitude and its phase on the waveform, IHD and THD. You can add number of harmonic elements in the program and see its effect on the resultant wave as shown below:
+This is a program to visualize the effect of harmonic's magnitude and its phase on the waveform, IHD and THD. 
+Working of the app is shown below:
+![GIF of project](https://github.com/snehkothari28/Harmonic_Visualizer/blob/main/media/Example.gif)
 
+You can add number of harmonic elements in the program and see its effect on the resultant wave as shown below:
 ![Image of project](https://github.com/snehkothari28/Harmonic_Visualizer/blob/main/media/thd_ihd%20pic%201.png)
 
 Or individual waves as well as resultant waves of harmonics can be seen as shown below:
