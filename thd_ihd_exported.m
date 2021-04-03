@@ -2,41 +2,47 @@
 %https://github.com/snehkothari28/Harmonic_Visualizer
 %This is a program to visualise the effect of harmonic's magnitude and its
 %phase on the waveform, IHD and THD.
+    
 classdef thd_ihd_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure                 matlab.ui.Figure
-        waves                    matlab.ui.control.RockerSwitch
+        UIFigure                       matlab.ui.Figure
+        LockPlotSwitch                 matlab.ui.control.Switch
+        LockPlotSwitchLabel            matlab.ui.control.Label
+        waves                          matlab.ui.control.Switch
+        ShowallwavesLabel              matlab.ui.control.Label
         THDandIHDSignificanceVisualiserbySnehKothariLabel  matlab.ui.control.Label
         TotalHarmonicDistortionEditField  matlab.ui.control.NumericEditField
-        ControlPanel             matlab.ui.container.Panel
-        TotalHarmonicDistortionEditFieldLabel  matlab.ui.control.Label
-        ShowallwavesLabel        matlab.ui.control.Label
-        NumberofHarmoniccontentsEditFieldLabel  matlab.ui.control.Label
-        NumberofHarmoniccontent  matlab.ui.control.NumericEditField
-        UIAxes                   matlab.ui.control.UIAxes
+        ControlPanel                   matlab.ui.container.Panel
+        TotalHarmonicDistortionLabel   matlab.ui.control.Label
+        NumberofHarmoniccontentsLabel  matlab.ui.control.Label
+        NumberofHarmoniccontent        matlab.ui.control.NumericEditField
+        UIAxes                         matlab.ui.control.UIAxes
     end
-
 
     properties (Access = private)
         time % time vector
         mag %magntiude of all harmonics
         phase % phase of all harmonics
-        
+
         %Control panel to maniuplate the values of harmonics
         GridLayout         matlab.ui.container.GridLayout
-        
+
         %Below shown values control the elements of control panel
         txtarea
         slidermag
         sliderph
         label
         swtch
+        
+        %lock the plot output
+        update_plot
+        limits
     end
 
     methods (Access = private)
-        %This function updates the plot after each change 
+        %This function updates the plot after each change
         function update(app)
             color = [0,0,0];
             if app.waves.Value
@@ -62,8 +68,15 @@ classdef thd_ihd_exported < matlab.apps.AppBase
                 "DisplayName", "Resultant Wave");
             legend(app.UIAxes)
             hold(app.UIAxes,"off")
+            if (app.update_plot + app.LockPlotSwitch.Value) > 0
+                app.UIAxes.YLim = app.limits * [-1 1];
+            else
+                app.limits = max(total)*1.1;
+                app.UIAxes.YLim = app.limits * [-1 1];
+            end
+            
         end
-        
+
         %This function creates the dynamic control panel
         function createobj(app)
             app.GridLayout = uigridlayout(app.ControlPanel);
@@ -105,6 +118,7 @@ classdef thd_ihd_exported < matlab.apps.AppBase
                 % Create Harmonic magnitude Slider
                 app.slidermag{i}= uislider(app.GridLayout);
                 app.slidermag{i}.ValueChangingFcn = {@app.slidermagfcn, i};
+                app.slidermag{i}.ValueChangedFcn = @app.slidermagValChangedfcn;
                 app.slidermag{i}.Layout.Row = [1 2] + 2*(i-1);
                 app.slidermag{i}.Layout.Column = 3;
                 app.slidermag{i}.Value = app.mag(i);
@@ -112,6 +126,7 @@ classdef thd_ihd_exported < matlab.apps.AppBase
                 % Create Harmonic phase Slider
                 app.sliderph{i}= uislider(app.GridLayout);
                 app.sliderph{i}.ValueChangingFcn = {@app.sliderphfcn, i};
+                app.slidermag{i}.ValueChangedFcn = @app.sliderValChangedfcn;
                 app.sliderph{i}.Layout.Row = [1 2] + 2*(i-1);
                 app.sliderph{i}.Layout.Column = 3;
                 app.sliderph{i}.Limits = [0 360];
@@ -144,13 +159,19 @@ classdef thd_ihd_exported < matlab.apps.AppBase
 
         %This function assign the slider value to appropriate magnitude
         function slidermagfcn(app,~,event,i)
+            app.update_plot = 1;
             app.mag(i) = event.Value;
             update(app);
         end
 
         %This function assign the slider value to appropriate phase
         function sliderphfcn(app,~,event,i)
+            app.update_plot = 1;
             app.phase(i) = event.Value;
+            update(app);
+        end
+        function sliderValChangedfcn(app,~,~)
+            app.update_plot = 0;
             update(app);
         end
     end
@@ -166,6 +187,8 @@ classdef thd_ihd_exported < matlab.apps.AppBase
             app.NumberofHarmoniccontent.Value = 3;
             app.mag = [50 , zeros(1,app.NumberofHarmoniccontent.Value-1)];
             app.phase = zeros(1,app.NumberofHarmoniccontent.Value);
+            app.update_plot = 0;
+            
             createobj(app);
         end
 
@@ -178,6 +201,14 @@ classdef thd_ihd_exported < matlab.apps.AppBase
         % Value changed function: NumberofHarmoniccontent
         function NumberofHarmoniccontentValueChanged(app, event)
             createobj(app);
+        end
+
+        % Value changed function: LockPlotSwitch
+        function LockPlotSwitchValueChanged(app, event)
+            if ~app.LockPlotSwitch.Value
+                update(app);
+            end
+            
         end
     end
 
@@ -207,25 +238,21 @@ classdef thd_ihd_exported < matlab.apps.AppBase
             app.NumberofHarmoniccontent.Limits = [0 Inf];
             app.NumberofHarmoniccontent.RoundFractionalValues = 'on';
             app.NumberofHarmoniccontent.ValueChangedFcn = createCallbackFcn(app, @NumberofHarmoniccontentValueChanged, true);
-            app.NumberofHarmoniccontent.Position = [208 390 79 22];
+            app.NumberofHarmoniccontent.Position = [147 390 39 22];
             app.NumberofHarmoniccontent.Value = 3;
 
-            % Create NumberofHarmoniccontentsEditFieldLabel
-            app.NumberofHarmoniccontentsEditFieldLabel = uilabel(app.UIFigure);
-            app.NumberofHarmoniccontentsEditFieldLabel.HorizontalAlignment = 'right';
-            app.NumberofHarmoniccontentsEditFieldLabel.Position = [31 390 167 22];
-            app.NumberofHarmoniccontentsEditFieldLabel.Text = 'Number of Harmonic contents';
+            % Create NumberofHarmoniccontentsLabel
+            app.NumberofHarmoniccontentsLabel = uilabel(app.UIFigure);
+            app.NumberofHarmoniccontentsLabel.HorizontalAlignment = 'right';
+            app.NumberofHarmoniccontentsLabel.Position = [31 384 106 28];
+            app.NumberofHarmoniccontentsLabel.Text = {'Number of '; 'Harmonic contents'};
 
-            % Create ShowallwavesLabel
-            app.ShowallwavesLabel = uilabel(app.UIFigure);
-            app.ShowallwavesLabel.Position = [598 390 88 22];
-            app.ShowallwavesLabel.Text = 'Show all waves';
-
-            % Create TotalHarmonicDistortionEditFieldLabel
-            app.TotalHarmonicDistortionEditFieldLabel = uilabel(app.UIFigure);
-            app.TotalHarmonicDistortionEditFieldLabel.HorizontalAlignment = 'right';
-            app.TotalHarmonicDistortionEditFieldLabel.Position = [345 390 154 22];
-            app.TotalHarmonicDistortionEditFieldLabel.Text = '% Total Harmonic Distortion';
+            % Create TotalHarmonicDistortionLabel
+            app.TotalHarmonicDistortionLabel = uilabel(app.UIFigure);
+            app.TotalHarmonicDistortionLabel.BackgroundColor = [1 1 1];
+            app.TotalHarmonicDistortionLabel.HorizontalAlignment = 'right';
+            app.TotalHarmonicDistortionLabel.Position = [546 387 102 28];
+            app.TotalHarmonicDistortionLabel.Text = {'% Total Harmonic '; 'Distortion'};
 
             % Create ControlPanel
             app.ControlPanel = uipanel(app.UIFigure);
@@ -236,7 +263,8 @@ classdef thd_ihd_exported < matlab.apps.AppBase
             % Create TotalHarmonicDistortionEditField
             app.TotalHarmonicDistortionEditField = uieditfield(app.UIFigure, 'numeric');
             app.TotalHarmonicDistortionEditField.Editable = 'off';
-            app.TotalHarmonicDistortionEditField.Position = [507 390 60 22];
+            app.TotalHarmonicDistortionEditField.BackgroundColor = [0.0745 0.6235 1];
+            app.TotalHarmonicDistortionEditField.Position = [656 393 60 22];
 
             % Create THDandIHDSignificanceVisualiserbySnehKothariLabel
             app.THDandIHDSignificanceVisualiserbySnehKothariLabel = uilabel(app.UIFigure);
@@ -247,12 +275,31 @@ classdef thd_ihd_exported < matlab.apps.AppBase
             app.THDandIHDSignificanceVisualiserbySnehKothariLabel.Position = [177 658 413 25];
             app.THDandIHDSignificanceVisualiserbySnehKothariLabel.Text = 'THD and IHD Significance Visualiser by Sneh Kothari';
 
+            % Create ShowallwavesLabel
+            app.ShowallwavesLabel = uilabel(app.UIFigure);
+            app.ShowallwavesLabel.HorizontalAlignment = 'right';
+            app.ShowallwavesLabel.Position = [206 384 54 28];
+            app.ShowallwavesLabel.Text = {'Show all '; 'waves'};
+
             % Create waves
-            app.waves = uiswitch(app.UIFigure, 'rocker');
+            app.waves = uiswitch(app.UIFigure, 'slider');
             app.waves.ItemsData = [0 1];
             app.waves.ValueChangedFcn = createCallbackFcn(app, @wavesValueChanged, true);
-            app.waves.Position = [696 372 20 45];
+            app.waves.Position = [288 391 45 20];
             app.waves.Value = 0;
+
+            % Create LockPlotSwitchLabel
+            app.LockPlotSwitchLabel = uilabel(app.UIFigure);
+            app.LockPlotSwitchLabel.HorizontalAlignment = 'center';
+            app.LockPlotSwitchLabel.Position = [384 385 31 28];
+            app.LockPlotSwitchLabel.Text = {'Lock'; 'Plot'};
+
+            % Create LockPlotSwitch
+            app.LockPlotSwitch = uiswitch(app.UIFigure, 'slider');
+            app.LockPlotSwitch.ItemsData = [0 1];
+            app.LockPlotSwitch.ValueChangedFcn = createCallbackFcn(app, @LockPlotSwitchValueChanged, true);
+            app.LockPlotSwitch.Position = [451 392 45 20];
+            app.LockPlotSwitch.Value = 0;
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';

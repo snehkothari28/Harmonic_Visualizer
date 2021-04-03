@@ -9,6 +9,14 @@ You can add number of harmonic elements in the program and see its effect on the
 Or individual waves as well as resultant waves of harmonics can be seen as shown below:
 ![Image of project](https://github.com/snehkothari28/Harmonic_Visualizer/blob/main/media/thd_ihd%20pic%202.png)
 
+## App options:
+**Number of Harmonic Contents:** This is the order of the max harmonic element desired in the plot.
+**Show all waves:** It either shows individual harmonic waves as well as resultant wave in the plot or only resultant wave.
+**Lock plot:** This locks the plot axis.
+**% Total harmonic Distortion:** This shows percent of harmonic distortion present in the wave.
+**Magnitude/phase Switch:**  This switches the slider control to Magnitude or phase control.
+**Slider:** This control Magnitude/phase values of the respective harmonic component.
+
 ## This app is based on MATLAB App Designer.
 
 Developed on **MATLAB R2021a** <br />
